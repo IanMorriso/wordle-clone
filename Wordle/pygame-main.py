@@ -35,6 +35,24 @@ def draw_guess(guess, row, colors):
         pygame.draw.rect(screen, color, (102 + i * CELL_SIZE, 102 + row * CELL_SIZE, CELL_SIZE-2, CELL_SIZE-2))
         screen.blit(text, (110 + i * CELL_SIZE, 110 + row * CELL_SIZE))
 
+def play_again_prompt(message):
+    prompt_font = pygame.font.Font(None, 48)
+    prompt_text = message + "\nPlay again? (Y/N)"
+    render_text(screen, prompt_text, (WIDTH // 2 - 100, HEIGHT // 2), prompt_font, FONT_COLOR)
+    pygame.display.flip()
+
+    waiting_for_response = True
+    while waiting_for_response:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_y:
+                    return True
+                elif event.key == pygame.K_n:
+                    return False
+                
 def render_text(screen, text, position, font, color=(255,0,0)):
     text = font.render(text, True, color)
     screen.blit(text, position)
@@ -45,6 +63,7 @@ def main():
     current_guess = ""
     guesses = []
     alert = ""
+    game_result = ""
 
     # Initialize game
     wordle_dict = ScrabbleDict(5, "scrabble5.txt")
@@ -66,6 +85,9 @@ def main():
                             game.add_guess((current_guess, colors))
                             current_guess = ""
                             if game.is_correct_guess() or len(game.get_guesses()) >= 5:
+                                game_result = "You lose!"
+                                if game.is_correct_guess():
+                                    game_result = "You win!"
                                 running = False
                 elif event.key == pygame.K_BACKSPACE:
                     current_guess = current_guess[:-1]
@@ -81,6 +103,10 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+
+        # Ask if the user wants to play again
+    if play_again_prompt(game_result):
+        main()  # Restart the game
 
     pygame.quit()
     sys.exit()

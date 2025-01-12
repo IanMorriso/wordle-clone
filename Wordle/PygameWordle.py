@@ -45,7 +45,6 @@ class Game:
             return guess + " was already entered"
 
         else:
-            #self.guesses.append(guess)
             return ""
 
     def play(self):
