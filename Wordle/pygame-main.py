@@ -2,10 +2,8 @@ import pygame
 import sys
 from PygameWordle import ScrabbleDict, Game
 
-# Initialize Pygame
 pygame.init()
 
-# Constants
 WIDTH, HEIGHT = 800, 600
 BG_COLOR = (255, 255, 255)
 GRID_COLOR = (0, 0, 0)
@@ -17,11 +15,10 @@ FONT_SIZE = 32
 GRID_SIZE = 5
 CELL_SIZE = 60
 
-# Set up the display
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Wordle Clone")
 
-# Load font
 font = pygame.font.Font(None, FONT_SIZE)
 
 def draw_grid():
@@ -32,15 +29,22 @@ def draw_grid():
 def draw_guess(guess, row, colors):
     for i, letter in enumerate(guess):
         text = font.render(letter.upper(), True, FONT_COLOR)
-        color = GREEN_COLOR if colors[i] == 'green' else ORANGE_COLOR if colors[i] == 'orange' else RED_COLOR
+        color = BG_COLOR
+        if len(colors) > 1:
+            color = GREEN_COLOR if colors[i] == 'green' else ORANGE_COLOR if colors[i] == 'orange' else RED_COLOR
         pygame.draw.rect(screen, color, (102 + i * CELL_SIZE, 102 + row * CELL_SIZE, CELL_SIZE-2, CELL_SIZE-2))
         screen.blit(text, (110 + i * CELL_SIZE, 110 + row * CELL_SIZE))
+
+def render_text(screen, text, position, font, color=(255,0,0)):
+    text = font.render(text, True, color)
+    screen.blit(text, position)
 
 def main():
     clock = pygame.time.Clock()
     running = True
     current_guess = ""
     guesses = []
+    alert = ""
 
     # Initialize game
     wordle_dict = ScrabbleDict(5, "scrabble5.txt")
@@ -55,12 +59,14 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    if len(current_guess) == GRID_SIZE:
-                        colors = game.match(current_guess.lower())
-                        game.add_guess((current_guess, colors))
-                        current_guess = ""
-                        if game.is_correct_guess() or len(game.get_guesses()) >= 5:
-                            running = False
+                    alert = game.inputValidator(current_guess)
+                    if not alert:
+                        if len(current_guess) == GRID_SIZE:
+                            colors = game.match(current_guess.lower())
+                            game.add_guess((current_guess, colors))
+                            current_guess = ""
+                            if game.is_correct_guess() or len(game.get_guesses()) >= 5:
+                                running = False
                 elif event.key == pygame.K_BACKSPACE:
                     current_guess = current_guess[:-1]
                 elif len(current_guess) < GRID_SIZE and event.unicode.isalpha():
@@ -68,7 +74,10 @@ def main():
 
         for row, (guess, colors) in enumerate(game.get_guesses()):
             draw_guess(guess, row, colors)
-        draw_guess(current_guess, len(game.get_guesses()), [''] * GRID_SIZE)
+        draw_guess(current_guess, len(game.get_guesses()), [])
+        
+        if alert:
+            render_text(screen, alert, (100, 500), font)
 
         pygame.display.flip()
         clock.tick(60)

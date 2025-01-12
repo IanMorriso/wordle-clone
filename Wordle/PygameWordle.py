@@ -33,6 +33,20 @@ class Game:
     def getWord(self):
         index = random.randint(0, self.dict.getSize() - 1)
         return self.dict.selectWord(index)
+    
+    def inputValidator(self, guess):
+        print(self.guesses)
+        if not self.dict.check(guess.lower()):
+            print(guess + " is not a recognized word")
+            return guess + " is not a recognized word"
+
+        elif any(g[0] == guess for g in self.guesses):
+            print(guess + " was already entered")
+            return guess + " was already entered"
+
+        else:
+            #self.guesses.append(guess)
+            return ""
 
     def play(self):
         pass  # This method will not be used in Pygame version
@@ -51,6 +65,7 @@ class Game:
         return result
 
     def add_guess(self, guess):
+        print("guess added ", len(self.guesses))
         self.guesses.append(guess)
 
     def is_correct_guess(self):
