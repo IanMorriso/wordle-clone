@@ -52,6 +52,30 @@ class Game:
         pass  # This method will not be used in Pygame version
 
     def match(self, guess):
+        result = ['red'] * self.size
+        word_chars = list(self.word)
+        guess_chars = list(guess)
+
+        # First pass: Check for correct letters in the correct positions (green)
+        for i in range(self.size):
+            if guess_chars[i] == word_chars[i]:
+                result[i] = 'green'
+                word_chars[i] = None  # Mark this letter as used
+                guess_chars[i] = None  # Mark this letter as used
+
+        # Second pass: Check for correct letters in the wrong positions (orange)
+        for i in range(self.size):
+            if guess_chars[i] is not None and guess_chars[i] in word_chars:
+                result[i] = 'orange'
+                word_chars[word_chars.index(guess_chars[i])] = None  # Mark this letter as used
+
+        if guess == self.word:
+            self.correctGuess = True
+
+        return result
+
+
+    def matchh(self, guess):
         result = []
         for i in range(self.size):
             if guess[i] == self.word[i]:
@@ -63,6 +87,7 @@ class Game:
         if guess == self.word:
             self.correctGuess = True
         return result
+
 
     def add_guess(self, guess):
         print("guess added ", len(self.guesses))
